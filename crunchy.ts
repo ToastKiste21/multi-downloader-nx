@@ -34,6 +34,28 @@ import { AvailableFilenameVars, getDefault } from './modules/module.args';
 import { AuthData, AuthResponse, Episode, ResponseBase, SearchData, SearchResponse, SearchResponseItem } from './@types/messageHandler';
 import { ServiceClass } from './@types/serviceClassInterface';
 
+function formatTitle(title: string): string {
+  // Replaces spaces and hyphens with dots, and removes apostrophes
+  title = title.replace(/[\s-]/g, '.').replace(/[’']/g, '');
+
+  // Map of special characters and their replacements
+  const replacements: { [key: string]: string } = {
+    'ä': 'ae',
+    'ö': 'oe',
+    'ü': 'ue',
+    'Ä': 'Ae',
+    'Ö': 'Oe',
+    'Ü': 'Ue',
+    'ß': 'ss'
+  };
+
+  // Split the title into characters, replace if they exist in the replacements map, then rejoin
+  title = title.split('').map(char => replacements[char] || char).join('');
+
+  return title;
+}
+
+
 export type sxItem = {
   language: langsData.LanguageItem,
   path: string,
@@ -1103,7 +1125,7 @@ export default class Crunchy implements ServiceClass {
         ['episode', isNaN(parseInt(medias.episodeNumber)) ? medias.episodeNumber : parseInt(medias.episodeNumber), false],
         ['service', 'CR', false],
         ['seriesTitle', medias.seriesTitle, true],
-        ['showTitle', medias.seasonTitle, true],
+        ['showTitle', formatTitle(medias.seasonTitle), true],
         ['season', medias.season, false]
       ] as [AvailableFilenameVars, string|number, boolean][]).map((a): Variable => {
         return {
